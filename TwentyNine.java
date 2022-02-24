@@ -150,7 +150,7 @@ class StopWordManager extends ActiveWFObject {
 
 
 class WordFrequencyManager extends ActiveWFObject {
-    Map<String, Integer> _word_freqs;
+    HashMap<String, Integer> _word_freqs;
 
     public WordFrequencyManager() {
         this._word_freqs = new HashMap<>();
@@ -184,6 +184,7 @@ class WordFrequencyManager extends ActiveWFObject {
 class WordFrequencyController extends ActiveWFObject {
 
     DataStorageManager _storage_manager = new DataStorageManager();
+
     @Override
     public void dispatch(Object[] message) {
         if ("run".equals(message[0])) {
@@ -198,13 +199,13 @@ class WordFrequencyController extends ActiveWFObject {
             }
         }
     }
+
     public void _run(Object[] message){
-        System.out.println("WordFrequencyController _run");
         this._storage_manager = (DataStorageManager) message[1];
         TwentyNine.send(this._storage_manager, new Object[]{"send_word_freqs",this});
     }
+
     public void _display(Object[] message){
-        System.out.println("WordFrequencyController _display");
         Map<String, Integer> word_freqs = (Map<String, Integer>) message[1];
         word_freqs.entrySet().stream().forEach(word -> System.out.println(word.getKey() + " - " + word.getValue()));
         TwentyNine.send(this._storage_manager,new Object[]{"die",null});
