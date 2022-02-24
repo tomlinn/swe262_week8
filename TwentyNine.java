@@ -73,7 +73,6 @@ class DataStorageManager extends ActiveWFObject {
 
     @Override
     public void dispatch(Object[] message) {
-        //System.out.println("DataStorageManager dispatch");
 
         if ("init".equals(message[0])) {
             this._init(message);
@@ -87,7 +86,6 @@ class DataStorageManager extends ActiveWFObject {
     public void _init (Object[] message){
         String path_to_file = (String) message[1];
         _stop_word_manager = (StopWordManager) message[2];
-        System.out.println("DataStorageManager _init");
         try {
             _data = Files.readString(Paths.get(path_to_file)).toLowerCase();
         }catch (Exception e){
@@ -96,7 +94,6 @@ class DataStorageManager extends ActiveWFObject {
     }
 
     public void _process_words(Object[] message) {
-        System.out.println("DataStorageManager _process_words");
         Object recipient = message[1];
         String data_str = String.join("",this._data);
         List<String> words = Arrays.asList(data_str.split("[^a-z]+"));
@@ -122,7 +119,6 @@ class StopWordManager extends ActiveWFObject {
 
     @Override
     public void dispatch(Object[] message) {
-        //System.out.println("StopWordManager dispatch");
         if ("init".equals(message[0])) {
             this._init(message);
         }else if ("filter".equals(message[0])) {
@@ -135,7 +131,6 @@ class StopWordManager extends ActiveWFObject {
 
     public void _init(Object[] message) {
         try {
-            System.out.println("StopWordManager _init");
             _stop_words = Arrays.asList(Files.readString(Paths.get("stop_words.txt")).split(","));
             this._word_freqs_manager = (WordFrequencyManager) message[1];
         } catch (IOException e) {
@@ -144,7 +139,6 @@ class StopWordManager extends ActiveWFObject {
     }
 
     public void _filter(Object[] message) {
-        System.out.println("StopWordManager _filter");
         String word = (String) message[1];
         if (!this._stop_words.contains(word)){
             TwentyNine.send(this._word_freqs_manager, new Object[]{"word", word});
@@ -164,9 +158,7 @@ class WordFrequencyManager extends ActiveWFObject {
 
     @Override
     public void dispatch(Object[] message) {
-        //System.out.println("WordFrequencyManager dispatch");
         if ("word".equals(message[0])) {
-
             this._increment_count(message);
         }else if ("top25".equals(message[0])) {
             this._top25(message);
@@ -174,12 +166,10 @@ class WordFrequencyManager extends ActiveWFObject {
     }
 
     public void _increment_count(Object[] message) {
-        System.out.println("WordFrequencyManager _increment_count");
         String word = (String) message[1];
         _word_freqs.put(word, _word_freqs.get(word)!=null ? _word_freqs.get(word) + 1: 1);
     }
     public void _top25(Object[] message) {
-        System.out.println("WordFrequencyManager _top25");
         Object recipient = message[1];
         Map<String, Integer> freqs_sorted = _word_freqs.entrySet().stream()
                 .sorted(comparingByValue(reverseOrder()))
@@ -196,14 +186,16 @@ class WordFrequencyController extends ActiveWFObject {
     DataStorageManager _storage_manager = new DataStorageManager();
     @Override
     public void dispatch(Object[] message) {
-        //System.out.println("WordFrequencyController dispatch");
         if ("run".equals(message[0])) {
-
             this._run(message);
         }else if ("top25".equals(message[0])) {
             this._display(message);
         }else {
-            //raise Exception("Message not understood "+message[0])
+            try {
+                throw new Exception("Message not understood " + message[0]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
     public void _run(Object[] message){
