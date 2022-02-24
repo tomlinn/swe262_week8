@@ -4,6 +4,10 @@ import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.io.*;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.reverseOrder;
+import static java.util.Map.Entry.comparingByValue;
 
 public class TwentyNine {
 
@@ -158,27 +162,25 @@ class WordFrequencyManager extends ActiveWFObject {
     public void dispatch(Object[] message) {
         System.out.println("WordFrequencyManager dispatch");
         if ("word".equals(message[0])) {
-            // TODO
-            // self._increment_count(message[1:])
+
+            this._increment_count(message);
         }else if ("top25".equals(message[0])) {
-            // TODO
-            // self._top25(message[1:])
+            this._top25(message);
         }
     }
 
     public void _increment_count(Object[] message) {
-        // TODO
-        // word = message[0]
-        // if word in self._word_freqs:
-        // self._word_freqs[word] += 1
-        // else:
-        // self._word_freqs[word] = 1
+        String word = (String) message[0];
+        _word_freqs.put(word, _word_freqs.get(word)!=null ? _word_freqs.get(word) + 1: 1);
     }
     public void _top25(Object[] message) {
-        // TODO
-        // recipient = message[0]
-        // freqs_sorted = sorted(self._word_freqs.items(), key=operator.itemgetter(1), reverse=True)
-        // send(recipient, ['top25', freqs_sorted])
+
+        Object recipient = message[0];
+        Map<String, Integer> freqs_sorted = _word_freqs.entrySet().stream()
+                .sorted(comparingByValue(reverseOrder()))
+                .limit(25)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        TwentyNine.send((ActiveWFObject) recipient, new Object[]{"top25", freqs_sorted});
 
     }
 
