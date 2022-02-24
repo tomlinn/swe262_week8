@@ -73,7 +73,7 @@ class DataStorageManager extends ActiveWFObject {
 
     @Override
     public void dispatch(Object[] message) {
-        System.out.println("DataStorageManager dispatch");
+        //System.out.println("DataStorageManager dispatch");
 
         if ("init".equals(message[0])) {
             this._init(message);
@@ -87,7 +87,7 @@ class DataStorageManager extends ActiveWFObject {
     public void _init (Object[] message){
         String path_to_file = (String) message[1];
         _stop_word_manager = (StopWordManager) message[2];
-
+        System.out.println("DataStorageManager _init");
         try {
             _data = Files.readString(Paths.get(path_to_file)).toLowerCase();
         }catch (Exception e){
@@ -96,14 +96,14 @@ class DataStorageManager extends ActiveWFObject {
     }
 
     public void _process_words(Object[] message) {
-
+        System.out.println("DataStorageManager _process_words");
         Object recipient = message[1];
         String data_str = String.join("",this._data);
         List<String> words = Arrays.asList(data_str.split("[^a-z]+"));
         for( String word : words){
             TwentyNine.send(_stop_word_manager,new Object[]{"filter",word});
-            TwentyNine.send(_stop_word_manager,new Object[]{"top25",recipient});
         }
+        TwentyNine.send(_stop_word_manager,new Object[]{"top25",recipient});
     }
 
 }
@@ -120,9 +120,8 @@ class StopWordManager extends ActiveWFObject {
 
     @Override
     public void dispatch(Object[] message) {
-
+        //System.out.println("StopWordManager dispatch");
         if ("init".equals(message[0])) {
-
             this._init(message);
         }else if ("filter".equals(message[0])) {
             this._filter(message);
@@ -134,6 +133,7 @@ class StopWordManager extends ActiveWFObject {
 
     public void _init(Object[] message) {
         try {
+            System.out.println("StopWordManager _init");
             _stop_words = Arrays.asList(Files.readString(Paths.get("stop_words.txt")).split(","));
             this._word_freqs_manager = (WordFrequencyManager) message[1];
         } catch (IOException e) {
@@ -142,8 +142,8 @@ class StopWordManager extends ActiveWFObject {
     }
 
     public void _filter(Object[] message) {
-
-        String word = (String) message[0];
+        System.out.println("StopWordManager _filter");
+        String word = (String) message[1];
         if (this._stop_words.contains(word)){
             TwentyNine.send(this._word_freqs_manager, new Object[]{"word", word});
         }
@@ -162,7 +162,7 @@ class WordFrequencyManager extends ActiveWFObject {
 
     @Override
     public void dispatch(Object[] message) {
-        System.out.println("WordFrequencyManager dispatch");
+        //System.out.println("WordFrequencyManager dispatch");
         if ("word".equals(message[0])) {
 
             this._increment_count(message);
@@ -172,11 +172,12 @@ class WordFrequencyManager extends ActiveWFObject {
     }
 
     public void _increment_count(Object[] message) {
-        String word = (String) message[0];
+        System.out.println("WordFrequencyManager _increment_count");
+        String word = (String) message[1];
         _word_freqs.put(word, _word_freqs.get(word)!=null ? _word_freqs.get(word) + 1: 1);
     }
     public void _top25(Object[] message) {
-
+        System.out.println("WordFrequencyManager _top25");
         Object recipient = message[1];
         Map<String, Integer> freqs_sorted = _word_freqs.entrySet().stream()
                 .sorted(comparingByValue(reverseOrder()))
@@ -193,6 +194,7 @@ class WordFrequencyController extends ActiveWFObject {
     DataStorageManager _storage_manager = new DataStorageManager();
     @Override
     public void dispatch(Object[] message) {
+        //System.out.println("WordFrequencyController dispatch");
         if ("run".equals(message[0])) {
 
             this._run(message);
@@ -203,11 +205,13 @@ class WordFrequencyController extends ActiveWFObject {
         }
     }
     public void _run(Object[] message){
+        System.out.println("WordFrequencyController _run");
         this._storage_manager = (DataStorageManager) message[1];
         TwentyNine.send(this._storage_manager, new Object[]{"send_word_freqs",this});
     }
     public void _display(Object[] message){
-        Map<String, Integer> word_freqs = (Map<String, Integer>) message[0];
+        System.out.println("WordFrequencyController _display");
+        Map<String, Integer> word_freqs = (Map<String, Integer>) message[1];
         word_freqs.entrySet().stream().forEach(word -> System.out.println(word.getKey() + " - " + word.getValue()));
         TwentyNine.send(this._storage_manager,new Object[]{"die",null});
         this.stopMe = true;
