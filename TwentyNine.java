@@ -103,12 +103,12 @@ class DataStorageManager extends ActiveWFObject {
 }
 
 class StopWordManager extends ActiveWFObject {
-    List<String> stopWords;
-    WordFrequencyManager wordFrequencyManager;
+    List<String> _stop_words;
+    WordFrequencyManager _word_freqs_manager;
 
 
     public StopWordManager(WordFrequencyManager wordFrequencyManager) {
-        this.stopWords = new ArrayList<>();
+        this._stop_words = new ArrayList<>();
 
     }
 
@@ -116,33 +116,32 @@ class StopWordManager extends ActiveWFObject {
     public void dispatch(Object[] message) {
 
         if ("init".equals(message[0])) {
-            // TODO
-            // self._init(message[1:])
+
+            this._init(message);
         }else if ("filter".equals(message[0])) {
-            // TODO
-            // self._filter(message[1:])
+            this._filter(message);
         }else{
-            // TODO
-            // forward
-            // send(self._word_freqs_manager, message)
+            TwentyNine.send(this._word_freqs_manager, message);
         }
 
     }
 
     public void _init(Object[] message) {
         try {
-            stopWords = Arrays.asList(Files.readString(Paths.get("stop_words.txt")).split(","));
-            this.wordFrequencyManager = (WordFrequencyManager) message[1];
+            _stop_words = Arrays.asList(Files.readString(Paths.get("stop_words.txt")).split(","));
+            this._word_freqs_manager = (WordFrequencyManager) message[1];
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void _filter(Object[] message) {
-        // TODO
-        // word = message[0]
-        // if word not in self._stop_words:
-        // send(self._word_freqs_manager, ['word', word])
+
+        String word = (String) message[0];
+        if (this._stop_words.contains(word)){
+            TwentyNine.send(this._word_freqs_manager, new Object[]{"word", word});
+        }
+
     }
 
 }
