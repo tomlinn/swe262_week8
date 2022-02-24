@@ -13,17 +13,19 @@ public class TwentyNine {
 
     public static void main(String[] args) throws Exception {
 
-        // word_freq_manager = WordFrequencyManager()
-        // stop_word_manager = StopWordManager()
-        // send(stop_word_manager, ['init', word_freq_manager])
-        // storage_manager = DataStorageManager()
-        // send(storage_manager, ['init', sys.argv[1], stop_word_manager])
-        // wfcontroller = WordFrequencyController()
-        // send(wfcontroller, ['run', storage_manager])
-        
-        // # Wait for the active objects to finish
-        // [t.join() for t in [word_freq_manager, stop_word_manager, storage_manager, wfcontroller]]
-        //
+        WordFrequencyManager word_freq_manager = new WordFrequencyManager();
+        StopWordManager stop_word_manager = new StopWordManager();
+        send(stop_word_manager, new Object[]{"init", word_freq_manager});
+        DataStorageManager storage_manager = new DataStorageManager();
+        send(storage_manager, new Object[]{"init", "pride-and-prijudice.txt", stop_word_manager});
+        WordFrequencyController wfcontroller = new WordFrequencyController();
+        send(wfcontroller, new Object[]{"run", storage_manager});
+
+        word_freq_manager.join();
+        stop_word_manager.join();
+        storage_manager.join();
+        wfcontroller.join();
+
     }
     public static void send(ActiveWFObject receiver, Object[] message) {
         receiver.queue.offer(message);
@@ -111,7 +113,7 @@ class StopWordManager extends ActiveWFObject {
     WordFrequencyManager _word_freqs_manager;
 
 
-    public StopWordManager(WordFrequencyManager wordFrequencyManager) {
+    public StopWordManager() {
         this._stop_words = new ArrayList<>();
 
     }
