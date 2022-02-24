@@ -101,7 +101,9 @@ class DataStorageManager extends ActiveWFObject {
         String data_str = String.join("",this._data);
         List<String> words = Arrays.asList(data_str.split("[^a-z]+"));
         for( String word : words){
-            TwentyNine.send(_stop_word_manager,new Object[]{"filter",word});
+            if (word.length() >= 2) {
+                TwentyNine.send(_stop_word_manager, new Object[]{"filter", word});
+            }
         }
         TwentyNine.send(_stop_word_manager,new Object[]{"top25",recipient});
     }
@@ -144,7 +146,7 @@ class StopWordManager extends ActiveWFObject {
     public void _filter(Object[] message) {
         System.out.println("StopWordManager _filter");
         String word = (String) message[1];
-        if (this._stop_words.contains(word)){
+        if (!this._stop_words.contains(word)){
             TwentyNine.send(this._word_freqs_manager, new Object[]{"word", word});
         }
 
