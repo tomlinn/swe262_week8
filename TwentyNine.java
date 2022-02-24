@@ -12,7 +12,7 @@ import static java.util.Map.Entry.comparingByValue;
 public class TwentyNine {
 
     public static void main(String[] args) throws Exception {
-        // TODO
+
         // word_freq_manager = WordFrequencyManager()
         // stop_word_manager = StopWordManager()
         // send(stop_word_manager, ['init', word_freq_manager])
@@ -182,6 +182,33 @@ class WordFrequencyManager extends ActiveWFObject {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
         TwentyNine.send((ActiveWFObject) recipient, new Object[]{"top25", freqs_sorted});
 
+    }
+
+}
+
+class WordFrequencyController extends ActiveWFObject {
+
+    DataStorageManager _storage_manager = new DataStorageManager();
+    @Override
+    public void dispatch(Object[] message) {
+        if ("run".equals(message[0])) {
+
+            this._run(message);
+        }else if ("top25".equals(message[0])) {
+            this._display(message);
+        }else {
+            //raise Exception("Message not understood "+message[0])
+        }
+    }
+    public void _run(Object[] message){
+        this._storage_manager = (DataStorageManager) message[0];
+        TwentyNine.send(this._storage_manager, new Object[]{"send_word_freqs",this});
+    }
+    public void _display(Object[] message){
+        Map<String, Integer> word_freqs = (Map<String, Integer>) message[0];
+        word_freqs.entrySet().stream().forEach(word -> System.out.println(word.getKey() + " - " + word.getValue()));
+        TwentyNine.send(this._storage_manager,new Object[]{"die",null});
+        this.stopMe = true;
     }
 
 }
