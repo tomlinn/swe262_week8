@@ -183,7 +183,7 @@ class WordFrequencyManager extends ActiveWFObject {
 
 class WordFrequencyController extends ActiveWFObject {
 
-    DataStorageManager _storage_manager = new DataStorageManager();
+    DataStorageManager _storage_manager;
 
     @Override
     public void dispatch(Object[] message) {
