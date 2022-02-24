@@ -70,36 +70,34 @@ class DataStorageManager extends ActiveWFObject {
         System.out.println("DataStorageManager dispatch");
 
         if ("init".equals(message[0])) {
-            // TODO
-            // self._init(message[1:])
+            this._init(message);
         }else if ("send_word_freqs".equals(message[0])) {
-            // TODO
-            // self._process_words(message[1:])
+            this._process_words(message);
         }else{
-            // TODO
-            // forward
-            // send(self._word_freqs_manager, message)
+            TwentyNine.send(_stop_word_manager, message);
         }
     }
 
     public void _init (Object[] message){
         String path_to_file = (String) message[0];
         _stop_word_manager = (StopWordManager) message[1];
-        // TODO
-        // with open(path_to_file) as f:
-        // self._data = f.read()
-        // pattern = re.compile('[\W_]+')
-        // self._data = pattern.sub(' ', self._data).lower()
+
+        try {
+            _data = Files.readString(Paths.get(path_to_file)).toLowerCase();
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
 
     public void _process_words(Object[] message) {
-        // TODO
-        // recipient = message[0]
-        // data_str = ''.join(self._data)
-        // words = data_str.split()
-        // for w in words:
-        // send(self._stop_word_manager, ['filter', w])
-        // send(self._stop_word_manager, ['top25', recipient])
+
+        Object recipient = message[0];
+        String data_str = String.join("",this._data);
+        List<String> words = Arrays.asList(data_str.split("[^a-z]+"));
+        for( String word : words){
+            TwentyNine.send(_stop_word_manager,new Object[]{"filter",word});
+            TwentyNine.send(_stop_word_manager,new Object[]{"top25",recipient});
+        }
     }
 
 }
