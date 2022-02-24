@@ -9,6 +9,17 @@ public class TwentyNine {
 
     public static void main(String[] args) throws Exception {
         // TODO
+        // word_freq_manager = WordFrequencyManager()
+        // stop_word_manager = StopWordManager()
+        // send(stop_word_manager, ['init', word_freq_manager])
+        // storage_manager = DataStorageManager()
+        // send(storage_manager, ['init', sys.argv[1], stop_word_manager])
+        // wfcontroller = WordFrequencyController()
+        // send(wfcontroller, ['run', storage_manager])
+        
+        // # Wait for the active objects to finish
+        // [t.join() for t in [word_freq_manager, stop_word_manager, storage_manager, wfcontroller]]
+        //
     }
     public static void send(ActiveWFObject receiver, Object[] message) {
         receiver.queue.offer(message);
@@ -33,7 +44,7 @@ class ActiveWFObject extends Thread {
             Object[] message;
 
             try {
-                message = queue.take(); // it will wait if null
+                message = queue.take(); // it will wait if it's null
                 dispatch(message);
                 if (message[0].equals("die")) {
                     this.stopMe = true;
