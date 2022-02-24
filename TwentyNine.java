@@ -17,7 +17,7 @@ public class TwentyNine {
         StopWordManager stop_word_manager = new StopWordManager();
         send(stop_word_manager, new Object[]{"init", word_freq_manager});
         DataStorageManager storage_manager = new DataStorageManager();
-        send(storage_manager, new Object[]{"init", "pride-and-prijudice.txt", stop_word_manager});
+        send(storage_manager, new Object[]{"init", "pride-and-prejudice.txt", stop_word_manager});
         WordFrequencyController wfcontroller = new WordFrequencyController();
         send(wfcontroller, new Object[]{"run", storage_manager});
 
@@ -85,8 +85,8 @@ class DataStorageManager extends ActiveWFObject {
     }
 
     public void _init (Object[] message){
-        String path_to_file = (String) message[0];
-        _stop_word_manager = (StopWordManager) message[1];
+        String path_to_file = (String) message[1];
+        _stop_word_manager = (StopWordManager) message[2];
 
         try {
             _data = Files.readString(Paths.get(path_to_file)).toLowerCase();
@@ -97,7 +97,7 @@ class DataStorageManager extends ActiveWFObject {
 
     public void _process_words(Object[] message) {
 
-        Object recipient = message[0];
+        Object recipient = message[1];
         String data_str = String.join("",this._data);
         List<String> words = Arrays.asList(data_str.split("[^a-z]+"));
         for( String word : words){
@@ -177,7 +177,7 @@ class WordFrequencyManager extends ActiveWFObject {
     }
     public void _top25(Object[] message) {
 
-        Object recipient = message[0];
+        Object recipient = message[1];
         Map<String, Integer> freqs_sorted = _word_freqs.entrySet().stream()
                 .sorted(comparingByValue(reverseOrder()))
                 .limit(25)
@@ -203,7 +203,7 @@ class WordFrequencyController extends ActiveWFObject {
         }
     }
     public void _run(Object[] message){
-        this._storage_manager = (DataStorageManager) message[0];
+        this._storage_manager = (DataStorageManager) message[1];
         TwentyNine.send(this._storage_manager, new Object[]{"send_word_freqs",this});
     }
     public void _display(Object[] message){
