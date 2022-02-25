@@ -1,14 +1,21 @@
-public class ThirtyOne {
-    // # Two data spaces
-    //         word_space = queue.Queue()
-    // freq_space = queue.Queue()
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
-    // stopwords = set(open('../stop_words.txt').read().split(','))
-
-    //  # Let's have this thread populate the word space
-    // for word in re.findall('[a-z]{2,}', open(sys.argv[1]).read().lower()):
-    //     word_space.put(word)
-    //
+public class Thirty {
+    public static void main(String[] args) throws Exception {
+        List<String> stopwords = Arrays.asList(Files.readString(Paths.get("stop_words.txt")).split(","));
+        BlockingQueue<String> word_space = new LinkedBlockingQueue<>();
+        BlockingQueue<Map<String,Integer>> freq_space = new LinkedBlockingQueue<>();
+        List<String> words = Arrays.asList(Files.readString(Paths.get("pride-and-prejudice.txt")).toLowerCase().split("[^a-z]+"));
+        for(String word : words){
+            word_space.put(word);
+        }
+    }
     // # Let's create the workers and launch them at their jobs
     // workers = []
     // for i in range(5):
