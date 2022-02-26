@@ -10,6 +10,13 @@ public class ThirtyTwo {
         // #
         // # The main function
         // #
+        Integer maxLines = read_file("pride-and-prejudice.txt").split("\n").length;
+        List<List<Object[]>> split = new ArrayList<>();
+        do{
+            split.add(split_words(partition(read_file("pride-and-prejudice.txt"), maxLines - curLine > 200 ? 200 : maxLines - curLine)));
+        } while(curLine < maxLines);
+        HashMap<String, List<Object[]>> splits_per_word = regroup(split);
+        System.out.println("\n");
         // splits = map(split_words, partition(read_file(sys.argv[1]), 200))
         // splits_per_word = regroup(splits)
         // word_freqs = sort(map(count_words, splits_per_word.items()))
@@ -18,13 +25,14 @@ public class ThirtyTwo {
         //     print(w, '-', c)
     }
 
-    public String partition(String data_str, Integer nlines) {
+    public static String partition(String data_str, Integer nlines) {
         List<String> lines =  Arrays.asList(data_str.split("\n"));
+        String result = String.join("\n",lines.subList(curLine,curLine+nlines));
         curLine += nlines;
-        return String.join("\n",lines.subList(curLine,curLine+nlines));
+        return result;
     }
 
-    public List<Object[]> split_words(String data_str) {
+    public static List<Object[]> split_words(String data_str) {
         //     # The actual work of the mapper
         List<Object[]> result = new ArrayList<>();
         List<String> words = _remove_stop_words(_scan(data_str));
@@ -34,11 +42,11 @@ public class ThirtyTwo {
         return result;
     }
 
-    public List<String> _scan(String str_data) {
+    public static  List<String> _scan(String str_data) {
         return  Arrays.asList(str_data.toLowerCase().split("[^a-z]+"));
     }
 
-    public List<String> _remove_stop_words(List<String> word_list) {
+    public static  List<String> _remove_stop_words(List<String> word_list) {
         try {
             List<String> stopWords = Arrays.asList(Files.readString(Paths.get("stop_words.txt")).split(","));
             return word_list.stream().filter(word -> !word_list.contains(word)).collect(Collectors.toList());
@@ -49,7 +57,7 @@ public class ThirtyTwo {
     }
 
 
-    public HashMap<String,List<Object[]>> regroup(List<List<Object[]>> pairs_list) {
+    public static  HashMap<String,List<Object[]>> regroup(List<List<Object[]>> pairs_list) {
         //     """
         //     Takes a list of lists of pairs of the form
         //     [[(w1, 1), (w2, 1), ..., (wn, 1)],
@@ -94,15 +102,16 @@ public class ThirtyTwo {
 
 
 
-    public String read_file(String path_to_file){
-        //     with open(path_to_file) as f:
-        //         data = f.read()
-        //     return data
+    public static String read_file(String path_to_file){
+        try {
+            return Files.readString(Paths.get(path_to_file)).toLowerCase();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    public Map<String, Integer> sort(Map<String, Integer> word_freq){
-        //     return sorted(word_freq, key=operator.itemgetter(1), reverse=True)
-    }
+
 
 
 
