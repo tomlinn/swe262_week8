@@ -49,7 +49,7 @@ public class ThirtyTwo {
     public static  List<String> _remove_stop_words(List<String> word_list) {
         try {
             List<String> stopWords = Arrays.asList(Files.readString(Paths.get("stop_words.txt")).split(","));
-            return word_list.stream().filter(word -> !word_list.contains(word)).collect(Collectors.toList());
+            return word_list.stream().filter(word -> !stopWords.contains(word) && word.length()>=2).collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -74,9 +74,9 @@ public class ThirtyTwo {
             for(Object[] p : pairs){
                 if(mapping.keySet().contains(p[0])){
                     mapping.get(p[0]).add(p);
-                    //mapping.put((String)p[0],);
                 }else{
-                    List tmp = new ArrayList<>(Arrays.asList(p));
+                    List<Object[]> tmp = new ArrayList<>();
+                    tmp.add(p);
                     mapping.put((String)p[0],tmp);
                 }
             }
