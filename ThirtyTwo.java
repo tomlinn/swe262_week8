@@ -24,12 +24,12 @@ public class ThirtyTwo {
         return String.join("\n",lines.subList(curLine,curLine+nlines));
     }
 
-    public Map<String,Integer> split_words(String data_str) {
+    public List<Object[]> split_words(String data_str) {
         //     # The actual work of the mapper
-        Map<String,Integer> result = new HashMap<>();
+        List<Object[]> result = new ArrayList<>();
         List<String> words = _remove_stop_words(_scan(data_str));
         for(String w : words){
-            result.put(w, 1);
+            result.add(new Object[]{w,1});
         }
         return result;
     }
