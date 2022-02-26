@@ -47,26 +47,20 @@ public class ThirtyTwo {
     }
 
 
-    public void regroup(List<String> pairs_list) {
-        //     """
-        //     Takes a list of lists of pairs of the form
-        //     [[(w1, 1), (w2, 1), ..., (wn, 1)],
-        //      [(w1, 1), (w2, 1), ..., (wn, 1)],
-        //      ...]
-        //     and returns a dictionary mapping each unique word to the
-        //     corresponding list of pairs, so
-        //     { w1 : [(w1, 1), (w1, 1)...],
-        //       w2 : [(w2, 1), (w2, 1)...],
-        //       ...}
-        //     """
-        //     mapping = {}
-        //     for pairs in pairs_list:
-        //         for p in pairs:
-        //             if p[0] in mapping:
-        //                 mapping[p[0]].append(p)
-        //             else:
-        //                 mapping[p[0]] = [p]
-        //     return mapping
+    public Map<String,Integer> regroup(List<Map<String,Integer>> pairs_list) {
+
+        Map<String,Integer> mapping = new HashMap<>();
+        for(Map<String,Integer> pairs : pairs_list){
+            for(String key: pairs.keySet()){
+                if(!mapping.keySet().contains(key)){
+                    mapping.put(key,pairs.get(key));
+                }else{
+                    mapping.put(key,mapping.get(key) + pairs.get(key));
+                }
+            }
+        }
+        return mapping;
+
     }
 
     public void count_words(String mapping){
