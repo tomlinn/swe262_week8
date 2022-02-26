@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,13 +23,14 @@ public class ThirtyTwo {
         return String.join("\n",lines.subList(curLine,curLine+nlines));
     }
 
-    public List<String> split_words(String data_str) {
+    public Map<String,Integer> split_words(String data_str) {
         //     # The actual work of the mapper
-        //     result = []
-        //     words = _remove_stop_words(_scan(data_str))
-        //     for w in words:
-        //         result.append((w, 1))
-        //     return result
+        Map<String,Integer> result = new HashMap<>();
+        List<String> words = _remove_stop_words(_scan(data_str));
+        for(String w : words){
+            result.put(w, 1);
+        }
+        return result;
     }
 
     public List<String> _scan(String str_data) {
