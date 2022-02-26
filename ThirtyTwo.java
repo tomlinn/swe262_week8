@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ThirtyTwo {
     static Integer curLine = 0;
@@ -18,7 +15,7 @@ public class ThirtyTwo {
     }
 
     public String partition(String data_str, Integer nlines) {
-        List<String> lines = List.of(data_str.split("\n"));
+        List<String> lines =  Arrays.asList(data_str.split("\n"));
         curLine += nlines;
         return String.join("\n",lines.subList(curLine,curLine+nlines));
     }
@@ -34,8 +31,7 @@ public class ThirtyTwo {
     }
 
     public List<String> _scan(String str_data) {
-        //     rpattern = re.compile('[\W_]+')
-        //     rreturn pattern.sub(' ', str_data).lower().split()
+        return  Arrays.asList(str_data.toLowerCase().split("[^a-z]+"));
     }
 
     public List<String> _remove_stop_words(List<String> word_list) {
