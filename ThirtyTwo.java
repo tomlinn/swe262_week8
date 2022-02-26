@@ -1,3 +1,6 @@
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class ThirtyTwo {
@@ -35,10 +38,12 @@ public class ThirtyTwo {
     }
 
     public List<String> _remove_stop_words(List<String> word_list) {
-        //     with open('../stop_words.txt') as f:
-        //         stop_words = f.read().split(',')
-        //     stop_words.extend(list(string.ascii_lowercase))
-        //     return [w for w in word_list if not w in stop_words]
+        try {
+            return Arrays.asList(Files.readString(Paths.get("stop_words.txt")).split(","));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 
