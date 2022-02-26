@@ -49,7 +49,7 @@ public class ThirtyTwo {
     }
 
 
-    public void regroup(List<String> pairs_list) {
+    public HashMap<String,List<Object[]>> regroup(List<List<Object[]>> pairs_list) {
         //     """
         //     Takes a list of lists of pairs of the form
         //     [[(w1, 1), (w2, 1), ..., (wn, 1)],
@@ -61,6 +61,19 @@ public class ThirtyTwo {
         //       w2 : [(w2, 1), (w2, 1)...],
         //       ...}
         //     """
+        HashMap<String,List<Object[]>> mapping = new HashMap<>();
+        for(List<Object[]> pairs : pairs_list){
+            for(Object[] p : pairs){
+                if(mapping.keySet().contains(p[0])){
+                    mapping.get(p[0]).add(p);
+                    //mapping.put((String)p[0],);
+                }else{
+                    List tmp = new ArrayList<>(Arrays.asList(p));
+                    mapping.put((String)p[0],tmp);
+                }
+            }
+        }
+        return mapping;
         //     for pairs in pairs_list:
         //         for p in pairs:
         //             if p[0] in mapping:
