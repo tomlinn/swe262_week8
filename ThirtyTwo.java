@@ -2,7 +2,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ThirtyTwo {
-
+    static Integer curLine = 0;
     public static void main(String[] args) throws Exception {
         // #
         // # The main function
@@ -15,14 +15,10 @@ public class ThirtyTwo {
         //     print(w, '-', c)
     }
 
-    public void partition(String data_str, List<String> nlines) {
-        //     """
-        //     Partitions the input data_str (a big string)
-        //     into chunks of nlines.
-        //     """
-        //     lines = data_str.split('\n')
-        //     for i in range(0, len(lines), nlines):
-        //         yield '\n'.join(lines[i:i+nlines])
+    public String partition(String data_str, Integer nlines) {
+        List<String> lines = List.of(data_str.split("\n"));
+        curLine += nlines;
+        return String.join("\n",lines.subList(curLine,curLine+nlines));
     }
 
     public List<String> split_words(String data_str) {
