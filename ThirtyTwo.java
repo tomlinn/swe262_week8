@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ThirtyTwo {
     static Integer curLine = 0;
@@ -39,7 +40,8 @@ public class ThirtyTwo {
 
     public List<String> _remove_stop_words(List<String> word_list) {
         try {
-            return Arrays.asList(Files.readString(Paths.get("stop_words.txt")).split(","));
+            List<String> stopWords = Arrays.asList(Files.readString(Paths.get("stop_words.txt")).split(","));
+            return word_list.stream().filter(word -> !word_list.contains(word)).collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
             return null;
