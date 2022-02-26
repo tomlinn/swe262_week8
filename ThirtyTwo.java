@@ -1,2 +1,95 @@
-package PACKAGE_NAME;public class ThirtyTwo {
+import java.util.List;
+import java.util.Map;
+
+public class ThirtyTwo {
+
+    public static void main(String[] args) throws Exception {
+        // #
+        // # The main function
+        // #
+        // splits = map(split_words, partition(read_file(sys.argv[1]), 200))
+        // splits_per_word = regroup(splits)
+        // word_freqs = sort(map(count_words, splits_per_word.items()))
+        //
+        // for (w, c) in word_freqs[0:25]:
+        //     print(w, '-', c)
+    }
+
+    public void partition(String data_str, List<String> nlines) {
+        //     """
+        //     Partitions the input data_str (a big string)
+        //     into chunks of nlines.
+        //     """
+        //     lines = data_str.split('\n')
+        //     for i in range(0, len(lines), nlines):
+        //         yield '\n'.join(lines[i:i+nlines])
+    }
+
+    public List<String> split_words(String data_str) {
+        //     # The actual work of the mapper
+        //     result = []
+        //     words = _remove_stop_words(_scan(data_str))
+        //     for w in words:
+        //         result.append((w, 1))
+        //     return result
+    }
+
+    public List<String> _scan(String str_data) {
+        //     rpattern = re.compile('[\W_]+')
+        //     rreturn pattern.sub(' ', str_data).lower().split()
+    }
+
+    public List<String> _remove_stop_words(List<String> word_list) {
+        //     with open('../stop_words.txt') as f:
+        //         stop_words = f.read().split(',')
+        //     stop_words.extend(list(string.ascii_lowercase))
+        //     return [w for w in word_list if not w in stop_words]
+    }
+
+
+    public void regroup(List<String> pairs_list) {
+        //     """
+        //     Takes a list of lists of pairs of the form
+        //     [[(w1, 1), (w2, 1), ..., (wn, 1)],
+        //      [(w1, 1), (w2, 1), ..., (wn, 1)],
+        //      ...]
+        //     and returns a dictionary mapping each unique word to the
+        //     corresponding list of pairs, so
+        //     { w1 : [(w1, 1), (w1, 1)...],
+        //       w2 : [(w2, 1), (w2, 1)...],
+        //       ...}
+        //     """
+        //     mapping = {}
+        //     for pairs in pairs_list:
+        //         for p in pairs:
+        //             if p[0] in mapping:
+        //                 mapping[p[0]].append(p)
+        //             else:
+        //                 mapping[p[0]] = [p]
+        //     return mapping
+    }
+
+    public void count_words(String mapping){
+        //     return (mapping[0], reduce(add, (pair[1] for pair in mapping[1])))
+    }
+    public Integer add(Integer x, Integer y){
+        return x+y;
+    }
+
+
+
+
+
+    public String read_file(String path_to_file){
+        //     with open(path_to_file) as f:
+        //         data = f.read()
+        //     return data
+    }
+
+    public Map<String, Integer> sort(Map<String, Integer> word_freq){
+        //     return sorted(word_freq, key=operator.itemgetter(1), reverse=True)
+    }
+
+
+
 }
