@@ -13,26 +13,34 @@ import static java.util.Map.Entry.comparingByValue;
 
 public class ThirtyTwo {
     static Integer curLine = 0;
+    static Integer maxLines = read_file("pride-and-prejudice.txt").split("\n").length;
     public static void main(String[] args) throws Exception {
-        Integer maxLines = read_file("pride-and-prejudice.txt").split("\n").length;
+
         List<List<Object[]>> split = new ArrayList<>();
-        do{
-            split.add(split_words(partition(read_file("pride-and-prejudice.txt"), maxLines - curLine > 200 ? 200 : maxLines - curLine)));
-        } while(curLine < maxLines);
+        split = map("split_words",read_file("pride-and-prejudice.txt"));
+
+        // Debug: make sure data didn't lost
+        // while(true){
+        //     if(split.size() != maxLines / 200 + 1){
+        //         break;
+        //     }
+        //     split = map("split_words",read_file("pride-and-prejudice.txt"));
+        // }
+        split = map("split_words",read_file("pride-and-prejudice.txt"));
 
         HashMap<String, List<Object[]>> splits_per_word = regroup(split);
 
-        map(splits_per_word).entrySet().stream()
+        ((ConcurrentHashMap<String, Integer>)map("count_words",splits_per_word)).entrySet().stream()
                 .sorted(comparingByValue(reverseOrder()))
                 .limit(25)
                 .forEach(word -> System.out.println(word.getKey() + " - " + word.getValue()));
 
     }
 
-    public static String partition(String data_str, Integer nlines) {
+    public static String partition(String data_str, Integer startLine, Integer nlines) {
+        nlines = maxLines - startLine < 200 ? maxLines - startLine : nlines;
         List<String> lines =  Arrays.asList(data_str.split("\n"));
-        String result = String.join("\n",lines.subList(curLine,curLine+nlines));
-        curLine += nlines;
+        String result = String.join("\n",lines.subList(startLine,startLine + nlines));
         return result;
     }
 
@@ -96,7 +104,7 @@ public class ThirtyTwo {
         return sum;
     }
 
-    public static ConcurrentHashMap<String, Integer> map( HashMap<String, List<Object[]>> splits_per_word) throws InterruptedException {
+    public static Object map(String functionName, HashMap<String, List<Object[]>> splits_per_word) throws InterruptedException {
 
         // Cannot use HashMap bcuz we are porcessing the result in theadpool, which is not safe.
         ConcurrentHashMap<String, Integer> result = new ConcurrentHashMap<>();
@@ -109,8 +117,10 @@ public class ThirtyTwo {
                     // check the size of Thread pool
                     // System.out.println("Thread # " + Thread.currentThread().getName() + " is doing this task");
 
-                    Object[] obj = count_words(new Object[]{key, splits_per_word.get(key)});
-                    result.put((String) obj[0],(Integer) obj[1]);
+                    if(functionName == "count_words") {
+                        Object[] obj = count_words(new Object[]{key, splits_per_word.get(key)});
+                        result.put((String) obj[0], (Integer) obj[1]);
+                    }
                 }
             });
             pool.execute(t);
@@ -119,7 +129,35 @@ public class ThirtyTwo {
         while (!pool.awaitTermination(100, TimeUnit.MILLISECONDS)){
             System.out.println("Thread Pool has not fully terminated");
         }
-        return result;
+        return (Object) result;
+    }
+    public static List<List<Object[]>> map(String functionName, String data) throws InterruptedException {
+        // Cannot use HashMap bcuz we are porcessing the result in theadpool, which is not safe.
+        ConcurrentHashMap<String, Integer> result = new ConcurrentHashMap<>();
+        ExecutorService pool = Executors.newFixedThreadPool(5);
+
+        //
+        List<List<Object[]>> result3 = Collections.synchronizedList(new ArrayList<>());
+
+        for (int i = 0; i < maxLines; i = i + 200) {
+            int finalI = i;
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    // check the size of Thread pool
+                    // System.out.println("Thread # " + Thread.currentThread().getName() + " is doing this task");
+                    result3.add(split_words(partition(read_file("pride-and-prejudice.txt"), finalI, 200)));
+                }
+            });
+            pool.execute(t);
+        }
+
+
+        pool.shutdown();
+        while (!pool.awaitTermination(500, TimeUnit.MILLISECONDS)){
+            System.out.println("Thread Pool has not fully terminated");
+        }
+        return result3;
     }
 
     public static String read_file(String path_to_file){
