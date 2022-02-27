@@ -2,10 +2,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.reverseOrder;
+import static java.util.Map.Entry.comparingByValue;
 
 public class ThirtyTwo {
     static Integer curLine = 0;
+    static Integer i = 0;
     public static void main(String[] args) throws Exception {
         // #
         // # The main function
@@ -17,10 +25,9 @@ public class ThirtyTwo {
         } while(curLine < maxLines);
         HashMap<String, List<Object[]>> splits_per_word = regroup(split);
         System.out.println("\n");
-        for(String key: splits_per_word.keySet()){
+        map(splits_per_word).entrySet().stream().sorted(comparingByValue(reverseOrder()))
+                .limit(25).forEach(word -> System.out.println(word.getKey() + " - " + word.getValue()));
 
-            count_words(new Object[]{key, splits_per_word.get(key)});
-        }
         // word_freqs = sort(map(count_words, splits_per_word.items()))
         //
         // for (w, c) in word_freqs[0:25]:
@@ -117,7 +124,37 @@ public class ThirtyTwo {
         }
         return sum;
     }
+    public static ConcurrentHashMap<String, Integer> map( HashMap<String, List<Object[]>> splits_per_word) throws InterruptedException {
 
+        ConcurrentHashMap<String, Integer> result = new ConcurrentHashMap<>();
+        List<Thread> threadList = new ArrayList<>();
+        ExecutorService pool = Executors.newFixedThreadPool(5);
+        for(String key: splits_per_word.keySet()){
+
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    i+= 1;
+                    System.out.println("Thread # " + Thread.currentThread().getName() + " is doing this task");
+                    Object[] obj = count_words(new Object[]{key, splits_per_word.get(key)});
+                    result.put((String) obj[0],(Integer) obj[1]);
+                }
+            });
+            threadList.add(t);
+            pool.execute(t);
+        }
+        pool.shutdown();
+        boolean finished = pool.awaitTermination(500, TimeUnit.MILLISECONDS);
+        if (finished){
+            System.out.println("finish");
+        }
+        System.out.println("threadList: " + threadList.size());
+
+
+        System.out.println("j: " + result.size());
+        System.out.println("result: " + result.size());
+        return result;
+    }
 
 
 
