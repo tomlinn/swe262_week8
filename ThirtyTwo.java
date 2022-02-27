@@ -67,9 +67,7 @@ public class ThirtyTwo {
                 if(mapping.keySet().contains(p[0])){
                     mapping.get(p[0]).add(p);
                 }else{
-                    List<Object[]> tmp = new ArrayList<>();
-                    tmp.add(p);
-                    mapping.put((String)p[0],tmp);
+                    mapping.put((String)p[0],new ArrayList<>(){{add(p);}});
                 }
             }
         }
@@ -80,7 +78,6 @@ public class ThirtyTwo {
     public static Object[] count_words(Object[] mapping){
         // input : ["project", [["project",1], ["project",1],,,,,] ]
         // output: ["project", N ]
-        
         return new Object[]{mapping[0],reduce("add", (List) mapping[1])};
     }
 
