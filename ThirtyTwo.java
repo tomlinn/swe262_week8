@@ -17,8 +17,10 @@ public class ThirtyTwo {
         } while(curLine < maxLines);
         HashMap<String, List<Object[]>> splits_per_word = regroup(split);
         System.out.println("\n");
-        // splits = map(split_words, partition(read_file(sys.argv[1]), 200))
-        // splits_per_word = regroup(splits)
+        for(String key: splits_per_word.keySet()){
+
+            count_words(new Object[]{key, splits_per_word.get(key)});
+        }
         // word_freqs = sort(map(count_words, splits_per_word.items()))
         //
         // for (w, c) in word_freqs[0:25]:
@@ -91,11 +93,29 @@ public class ThirtyTwo {
         //     return mapping
     }
 
-    public void count_words(String mapping){
+    public static Object[] count_words(Object[] mapping){
+        // input : ["project", [["project",1], ["project",1],,,,,] ]
+        // output: ["project", N ]
+        Object[] result = new Object[2];
+        result[0] = mapping[0];
+
+        List objects = (List) mapping[1];
+        result[1] = reduce("add",objects);
         //     return (mapping[0], reduce(add, (pair[1] for pair in mapping[1])))
+        return result;
     }
     public Integer add(Integer x, Integer y){
         return x+y;
+    }
+    public static Integer reduce(String functionName, List data){
+        Integer sum = 0;
+        if(functionName == "add") {
+            for (Object object : data) {
+                Object[] obj = (Object[]) object;
+                sum += (Integer) obj[1];
+            }
+        }
+        return sum;
     }
 
 
