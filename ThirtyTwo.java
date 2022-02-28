@@ -12,12 +12,11 @@ import static java.util.Collections.reverseOrder;
 import static java.util.Map.Entry.comparingByValue;
 
 public class ThirtyTwo {
-    static Integer curLine = 0;
     static Integer maxLines = read_file("pride-and-prejudice.txt").split("\n").length;
+
     public static void main(String[] args) throws Exception {
 
-        List<List<Object[]>> split = new ArrayList<>();
-        split = map("split_words",read_file("pride-and-prejudice.txt"));
+        List<List<Object[]>> split = map("split_words",read_file("pride-and-prejudice.txt"));
 
         // Debug: make sure data didn't lost
         // while(true){
@@ -26,11 +25,9 @@ public class ThirtyTwo {
         //     }
         //     split = map("split_words",read_file("pride-and-prejudice.txt"));
         // }
-        split = map("split_words",read_file("pride-and-prejudice.txt"));
-
         HashMap<String, List<Object[]>> splits_per_word = regroup(split);
 
-        ((ConcurrentHashMap<String, Integer>)map("count_words",splits_per_word)).entrySet().stream()
+        map("count_words",splits_per_word).entrySet().stream()
                 .sorted(comparingByValue(reverseOrder()))
                 .limit(25)
                 .forEach(word -> System.out.println(word.getKey() + " - " + word.getValue()));
@@ -69,13 +66,17 @@ public class ThirtyTwo {
     }
 
     public static  HashMap<String,List<Object[]>> regroup(List<List<Object[]>> pairs_list) {
+        // regroup by the first letter of words
+        // input : [ 0 : [["apples",1], ["project",1], ["parent",1], .... ], 1 : [["banana",1], ["project",1], ["parent",1], .... ]]
+        // output: ["p": [["project",1], ["parent",1], ["project",1], ["parent",1]....], "k": [], "z": [], ... ]
         HashMap<String,List<Object[]>> mapping = new HashMap<>();
         for(List<Object[]> pairs : pairs_list){
             for(Object[] p : pairs){
-                if(mapping.keySet().contains(p[0])){
-                    mapping.get(p[0]).add(p);
+                String captialLetter = ((String)p[0]).substring(0,1);
+                if(mapping.keySet().contains(captialLetter)){
+                    mapping.get(captialLetter).add(p);
                 }else{
-                    mapping.put((String)p[0],new ArrayList<>(){{add(p);}});
+                    mapping.put(captialLetter, new ArrayList<>(){{add(p);}});
                 }
             }
         }
@@ -84,27 +85,33 @@ public class ThirtyTwo {
     }
 
     public static Object[] count_words(Object[] mapping){
-        // input : ["project", [["project",1], ["project",1],,,,,] ]
-        // output: ["project", N ]
-        return new Object[]{mapping[0],reduce("add", (List) mapping[1])};
+        // input : ["project", [["project",1], ["parent",1], ["parent",1],,,,,]]
+        // output: ["project", [["project",1], ["parent",2]....]]
+        return new Object[]{mapping[0], reduce("add", (List) mapping[1])};
     }
 
     public Integer add(Integer x, Integer y){
-        return x+y;
+        return x + y;
     }
 
-    public static Integer reduce(String functionName, List data){
-        Integer sum = 0;
+    public static HashMap reduce(String functionName, List data){
+        // input : [["project",1], ["parent",1], ["parent",1],,,,,]
+        // output: [["project",1], ["parent",2]....]
+        HashMap <String, Integer> result = new HashMap<>();
         if(functionName == "add") {
             for (Object object : data) {
                 Object[] obj = (Object[]) object;
-                sum += (Integer) obj[1];
+                if(result.get(obj[0]) != null){
+                    result.put((String) obj[0],result.get(obj[0])+1);
+                }else {
+                    result.put((String) obj[0],1);
+                }
             }
         }
-        return sum;
+        return result;
     }
 
-    public static Object map(String functionName, HashMap<String, List<Object[]>> splits_per_word) throws InterruptedException {
+    public static ConcurrentHashMap<String, Integer> map(String functionName, HashMap<String, List<Object[]>> splits_per_word) throws InterruptedException {
 
         // Cannot use HashMap bcuz we are porcessing the result in theadpool, which is not safe.
         ConcurrentHashMap<String, Integer> result = new ConcurrentHashMap<>();
@@ -118,46 +125,46 @@ public class ThirtyTwo {
                     // System.out.println("Thread # " + Thread.currentThread().getName() + " is doing this task");
 
                     if(functionName == "count_words") {
+                        // obj = ["project", [["project",1], ["parent",2]....]]
                         Object[] obj = count_words(new Object[]{key, splits_per_word.get(key)});
-                        result.put((String) obj[0], (Integer) obj[1]);
+                        result.putAll((Map<String, Integer>)obj[1]);
                     }
                 }
             });
             pool.execute(t);
         }
         pool.shutdown();
-        while (!pool.awaitTermination(100, TimeUnit.MILLISECONDS)){
-            System.out.println("Thread Pool has not fully terminated");
+        while (!pool.awaitTermination(500, TimeUnit.MILLISECONDS)){
+            System.out.println("Thread Pool has not fully terminated, please wait");
         }
-        return (Object) result;
+        return result;
     }
     public static List<List<Object[]>> map(String functionName, String data) throws InterruptedException {
-        // Cannot use HashMap bcuz we are porcessing the result in theadpool, which is not safe.
-        ConcurrentHashMap<String, Integer> result = new ConcurrentHashMap<>();
+        // synchronized list
+        List<List<Object[]>> result = Collections.synchronizedList(new ArrayList<>());
         ExecutorService pool = Executors.newFixedThreadPool(5);
 
-        //
-        List<List<Object[]>> result3 = Collections.synchronizedList(new ArrayList<>());
 
         for (int i = 0; i < maxLines; i = i + 200) {
-            int finalI = i;
+            Integer finalI = i;
             Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    // check the size of Thread pool
-                    // System.out.println("Thread # " + Thread.currentThread().getName() + " is doing this task");
-                    result3.add(split_words(partition(read_file("pride-and-prejudice.txt"), finalI, 200)));
+                    if(functionName == "split_words") {
+                        // check the size of Thread pool
+                        // System.out.println("Thread # " + Thread.currentThread().getName() + " is doing this task");
+                        result.add(split_words(partition(read_file("pride-and-prejudice.txt"), finalI, 200)));
+                    }
                 }
             });
             pool.execute(t);
         }
 
-
         pool.shutdown();
         while (!pool.awaitTermination(500, TimeUnit.MILLISECONDS)){
-            System.out.println("Thread Pool has not fully terminated");
+            System.out.println("Thread Pool has not fully terminated, please wait");
         }
-        return result3;
+        return result;
     }
 
     public static String read_file(String path_to_file){
