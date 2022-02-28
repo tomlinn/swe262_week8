@@ -12,11 +12,12 @@ import static java.util.Collections.reverseOrder;
 import static java.util.Map.Entry.comparingByValue;
 
 public class ThirtyTwo {
-    static Integer maxLines = read_file("pride-and-prejudice.txt").split("\n").length;
+    static Integer maxLines;
 
     public static void main(String[] args) throws Exception {
-
-        List<List<Object[]>> split = map("split_words",read_file("pride-and-prejudice.txt"));
+        String filename = "pride-and-prejudice.txt";
+        maxLines = read_file(filename).split("\n").length;
+        List<List<Object[]>> split = map("split_words",read_file(filename));
 
         // Debug: make sure data didn't lost
         // while(true){
